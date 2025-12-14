@@ -1,0 +1,62 @@
+{
+    "timestamp": "2025-11-11 11:33:12",
+    "data_leakage_fixed": true,
+    "removed_features": [
+        "efficiency_ratio",
+        "catalyst_performance"
+    ],
+    "dataset_info": {
+        "total_size": 1975,
+        "train_size": 1580,
+        "test_size": 395
+    },
+    "features": [
+        "Methane_Feed_",
+        "Reactor_Pressu",
+        "Reactor_Temper",
+        "Heating_Power_",
+        "Catalyst_Cycle_",
+        "Catalyst_Activity",
+        "Catalyst_Carbon",
+        "hour",
+        "day_of_week",
+        "is_weekend"
+    ],
+    "targets": [
+        "H2_Yield_Rate",
+        "Carbon_Quality_",
+        "H2_Purity_Post_",
+        "Net_Profit_Margin_Index"
+    ],
+    "training_time_seconds": 0.96,
+    "model_performance": {
+        "H2_Yield_Rate": {
+            "Train_MAPE": 6.36,
+            "Test_MAPE": 11.7,
+            "Train_R2": 0.9917,
+            "Test_R2": 0.9711,
+            "Best_Iteration": 145
+        },
+        "Carbon_Quality_": {
+            "Train_MAPE": 2.57,
+            "Test_MAPE": 3.39,
+            "Train_R2": 0.5395,
+            "Test_R2": 0.2024,
+            "Best_Iteration": 60
+        },
+        "H2_Purity_Post_": {
+            "Train_MAPE": 0.0,
+            "Test_MAPE": 0.0,
+            "Train_R2": 0.1212,
+            "Test_R2": 0.0199,
+            "Best_Iteration": 28
+        },
+        "Net_Profit_Margin_Index": {
+            "Train_MAPE": 5.31,
+            "Test_MAPE": 9.43,
+            "Train_R2": 0.9914,
+            "Test_R2": 0.967,
+            "Best_Iteration": 145
+        }
+    }
+}
