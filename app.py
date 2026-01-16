@@ -165,47 +165,43 @@ if page == "📊 Overview":
     
     col1, col2, col3, col4 = st.columns(4)
     
-    # Box 1 - Blue
     with col1:
         st.markdown("""
-        <div class="metric-card-fixed" style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
-            <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 8px;'>🎯 Best Model</div>
-            <div style='color: #ffffff; font-size: 1.9rem; font-weight: bold; line-height: 1;'>CatBoost</div>
-            <div style='color: #90ee90; font-size: 0.85rem; margin-top: 5px;'>↑ R² > 0.999</div>
+        <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    padding: 30px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
+            <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 12px;'>🎯 Best Model</div>
+            <div style='color: #ffffff; font-size: 2rem; font-weight: bold; margin-bottom: 8px; line-height: 1.1;'>CatBoost</div>
+            <div style='color: #90ee90; font-size: 0.9rem;'>↑ R² > 0.999</div>
         </div>
         """, unsafe_allow_html=True)
     
-    # Box 2 - Green
     with col2:
         st.markdown("""
-        <div class="metric-card-fixed" style='background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
-            <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 8px;'>⚡ Inference Speed</div>
-            <div style='color: #ffffff; font-size: 1.9rem; font-weight: bold; line-height: 1;'>&lt;1ms</div>
-            <div style='color: #90ee90; font-size: 0.85rem; margin-top: 5px;'>↑ Real-time</div>
+        <div style='background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
+                    padding: 30px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
+            <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 12px;'>⚡ Inference Speed</div>
+            <div style='color: #ffffff; font-size: 2rem; font-weight: bold; margin-bottom: 8px; line-height: 1.1;'>&lt;1ms</div>
+            <div style='color: #90ee90; font-size: 0.9rem;'>↑ Real-time</div>
         </div>
         """, unsafe_allow_html=True)
     
-    # Box 3 - Pink
     with col3:
         st.markdown("""
-        <div class="metric-card-fixed" style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
-            <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 8px;'>🌍 Carbon Reduction</div>
-            <div style='color: #ffffff; font-size: 1.9rem; font-weight: bold; line-height: 1;'>138,462x</div>
-            <div style='color: #90ee90; font-size: 0.85rem; margin-top: 5px;'>↑ vs Baseline</div>
+        <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+                    padding: 30px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
+            <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 12px;'>🌍 Carbon Reduction</div>
+            <div style='color: #ffffff; font-size: 1.8rem; font-weight: bold; margin-bottom: 8px; line-height: 1.1;'>138,462x</div>
+            <div style='color: #90ee90; font-size: 0.9rem;'>↑ vs Baseline</div>
         </div>
         """, unsafe_allow_html=True)
     
-    # Box 4 - Yellow
     with col4:
         st.markdown("""
-        <div class="metric-card-fixed" style='background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); 
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
-            <div style='color: #2d2d2d; font-size: 0.9rem; margin-bottom: 8px;'>💰 ROI Potential</div>
-            <div style='color: #1a1a1a; font-size: 1.9rem; font-weight: bold; line-height: 1;'>530%</div>
-            <div style='color: #006400; font-size: 0.85rem; margin-top: 5px;'>↑ Annual</div>
+        <div style='background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); 
+                    padding: 30px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
+            <div style='color: #2d2d2d; font-size: 0.9rem; margin-bottom: 12px;'>💰 ROI Potential</div>
+            <div style='color: #1a1a1a; font-size: 2rem; font-weight: bold; margin-bottom: 8px; line-height: 1.1;'>530%</div>
+            <div style='color: #006400; font-size: 0.9rem;'>↑ Annual</div>
         </div>
         """, unsafe_allow_html=True)
 
