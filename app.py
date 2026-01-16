@@ -186,14 +186,15 @@ if page == "📊 Overview":
         """, unsafe_allow_html=True)
     
     with col3:
-        st.markdown("""
-        <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
-                    padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
-            <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 10px;'>🌍 Carbon Reduction</div>
-            <div style='color: #ffffff; font-size: 2rem; font-weight: bold; margin-bottom: 5px;'>138,462x</div>
-            <div style='color: #90ee90; font-size: 0.85rem;'>↑ vs Baseline</div>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+                padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                height: 140px; display: flex; flex-direction: column; justify-content: center;'>
+        <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 8px;'>🌍 Carbon Reduction</div>
+        <div style='color: #ffffff; font-size: 2rem; font-weight: bold; line-height: 1.2;'>138,462x</div>
+        <div style='color: #90ee90; font-size: 0.85rem; margin-top: 5px;'>↑ vs Baseline</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     with col4:
         st.markdown("""
