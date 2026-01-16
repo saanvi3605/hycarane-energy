@@ -186,15 +186,15 @@ if page == "📊 Overview":
         """, unsafe_allow_html=True)
     
     with col3:
-    st.markdown("""
-    <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
-                padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-                height: 140px; display: flex; flex-direction: column; justify-content: center;'>
-        <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 8px;'>🌍 Carbon Reduction</div>
-        <div style='color: #ffffff; font-size: 2rem; font-weight: bold; line-height: 1.2;'>138,462x</div>
-        <div style='color: #90ee90; font-size: 0.85rem; margin-top: 5px;'>↑ vs Baseline</div>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+                    padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                    height: 140px; display: flex; flex-direction: column; justify-content: center;'>
+            <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 8px;'>🌍 Carbon Reduction</div>
+            <div style='color: #ffffff; font-size: 2rem; font-weight: bold; line-height: 1.2;'>138,462x</div>
+            <div style='color: #90ee90; font-size: 0.85rem; margin-top: 5px;'>↑ vs Baseline</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col4:
         st.markdown("""
@@ -205,65 +205,6 @@ if page == "📊 Overview":
             <div style='color: #006400; font-size: 0.85rem;'>↑ Annual</div>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### 🎯 System Capabilities")
-        st.markdown("""
-        - **Multi-Target Prediction**: 4 simultaneous outputs
-        - **Real-Time Inference**: Sub-millisecond latency
-        - **High Accuracy**: R² scores > 0.999
-        - **Production Ready**: Deployed & tested
-        - **Interactive UI**: 6-page dashboard
-        """)
-    
-    with col2:
-        st.markdown("### 📈 Key Targets")
-        st.markdown("""
-        - **H2 Yield Rate**: Hydrogen production efficiency
-        - **Carbon Quality**: Product purity metrics
-        - **H2 Purity Post**: Post-processing purity
-        - **Net Profit Margin**: Economic viability
-        """)
-    
-    if df is not None:
-        st.markdown("---")
-        st.markdown("### 📊 Dataset Statistics")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        target_cols = ['H2_Yield_Rate', 'Carbon_Quality_', 'H2_Purity_Post_', 'Net_Profit_Margin_Index']
-        feature_count = len([col for col in df.columns if col not in target_cols])
-        
-        with col1:
-            st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
-                        padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
-                <div style='color: #e0e0e0; font-size: 1rem; margin-bottom: 10px;'>Total Samples</div>
-                <div style='color: #ffffff; font-size: 2.5rem; font-weight: bold;'>{len(df):,}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with col2:
-            st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); 
-                        padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
-                <div style='color: #2d2d2d; font-size: 1rem; margin-bottom: 10px;'>Input Features</div>
-                <div style='color: #1a1a1a; font-size: 2.5rem; font-weight: bold;'>{feature_count}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with col3:
-            st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); 
-                        padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
-                <div style='color: #2d2d2d; font-size: 1rem; margin-bottom: 10px;'>Target Variables</div>
-                <div style='color: #1a1a1a; font-size: 2.5rem; font-weight: bold;'>4</div>
-            </div>
-            """, unsafe_allow_html=True)
 
 # PAGE 2: MODEL PERFORMANCE
 elif page == "🎯 Model Performance":
