@@ -152,7 +152,7 @@ st.sidebar.title("⚡ Hycarane Energy")
 st.sidebar.markdown("---")
 page = st.sidebar.radio(
     "Navigation",
-    ["📊 Overview", "🎯 Model Performance", "🌍 Sustainability", "🔮 Live Prediction", "💰 Business Impact"]
+    ["📊 Overview", "🎯 Model Performance", "🌍 Sustainability", "🔮 Live Prediction", "🎛 Control & Optimization","📈 Economic Impact"]
 )
 st.sidebar.markdown("---")
 st.sidebar.info("*Hackathon Submission*\nReal-time ML Dashboard\nProduction-Ready Interface")
@@ -216,7 +216,7 @@ if page == "📊 Overview":
         - **Real-Time Inference**: Sub-millisecond latency
         - **High Accuracy**: R² scores > 0.999
         - **Production Ready**: Deployed & tested
-        - **Interactive UI**: 5-page dashboard
+        - **Interactive UI**: 6-page dashboard
         """)
     
     with col2:
@@ -481,8 +481,7 @@ elif page == "🌍 Sustainability":
         **Key Insight:** Edge-deployed models consume negligible power after training, 
         while cloud runs 24/7. This results in a {comparison_factor:,}x advantage.
         """)
-
-# PAGE 4: LIVE PREDICTION
+# PAGE 4: LIVE PREDICTION (PART 1)
 elif page == "🔮 Live Prediction":
     st.markdown('<h1 class="main-header">🔮 Live Model Prediction</h1>', unsafe_allow_html=True)
     st.markdown("### Real-Time Inference System")
@@ -642,8 +641,7 @@ elif page == "🔮 Live Prediction":
                 
                 if num_features > display_features:
                     st.caption(f"... and {num_features - display_features} more features")
-        
-        # METHOD 4: UPLOAD CSV
+# METHOD 4: UPLOAD CSV
         else:
             st.markdown("### 📤 Batch Prediction from CSV")
             
@@ -661,7 +659,6 @@ elif page == "🔮 Live Prediction":
                         st.success(f"✅ Loaded {len(new_data)} samples successfully!")
                         
                         X_batch = preprocess_features(new_data, feature_cols).values
-
                         
                         with st.spinner("Running predictions..."):
                             predictions = {}
@@ -780,128 +777,767 @@ elif page == "🔮 Live Prediction":
     
     else:
         st.error("❌ Models or data not loaded properly. Please check your model files and dataset.")
+# PAGE 5: CONTROL & OPTIMIZATION
+elif page == "🎛 Control & Optimization":
+    st.markdown('<h1 class="main-header">🎛 Reactor Optimization Engine</h1>', unsafe_allow_html=True)
+    st.markdown("### AI-Powered Parameter Recommendations")
+    
+    if df is not None and models:
+        # Import optimization library
+        from scipy.optimize import differential_evolution
+        
+        target_cols = ['H2_Yield_Rate', 'Carbon_Quality_', 'H2_Purity_Post_', 'Net_Profit_Margin_Index']
+        feature_cols = [col for col in df.columns if col not in target_cols]
+        
+        # Calculate feature bounds
+        feature_bounds = {}
+        for feature in feature_cols:
+            if pd.api.types.is_datetime64_any_dtype(df[feature]):
+                # Convert datetime to numeric (Unix timestamp in seconds)
+                numeric_series = df[feature].astype('int64') / 10**9
+                feature_bounds[feature] = {
+                    'min': float(numeric_series.min()),
+                    'max': float(numeric_series.max()),
+                    'mean': float(numeric_series.mean())
+                }
+            else:
+                feature_bounds[feature] = {
+                    'min': float(df[feature].min()),
+                    'max': float(df[feature].max()),
+                    'mean': float(df[feature].mean())
+                }
+        
+        st.markdown("---")
+        
+        # Optimization mode selection
+        opt_mode = st.radio(
+            "Select Optimization Mode",
+            ["🎯 Single Target", "⚖️ Multi-Target Balance", "🔧 What-If Analysis"],
+            horizontal=True
+        )
+        
+        # MODE 1: SINGLE TARGET OPTIMIZATION
+        if opt_mode == "🎯 Single Target":
+            st.markdown("### 🎯 Maximize/Minimize a Single Target")
+            
+            col1, col2 = st.columns([1, 1])
+            
+            with col1:
+                st.markdown("#### Optimization Goal")
+                target_to_optimize = st.selectbox(
+                    "Select target to optimize",
+                    target_cols,
+                    format_func=lambda x: x.replace('_', ' ').title()
+                )
+                
+                objective = st.radio("Objective", ["Maximize", "Minimize"], horizontal=True)
+                minimize_flag = (objective == "Minimize")
+                
+                st.markdown("#### Constraints (Optional)")
+                use_constraints = st.checkbox("Add constraints on other targets")
+                
+                constraints = {}
+                if use_constraints:
+                    for target in target_cols:
+                        if target != target_to_optimize:
+                            with st.expander(f"Constrain {target.replace('_', ' ').title()}"):
+                                enable = st.checkbox(f"Enable constraint", key=f"enable_{target}")
+                                if enable:
+                                    col_a, col_b = st.columns(2)
+                                    with col_a:
+                                        min_val = st.number_input(
+                                            "Min value",
+                                            value=float(df[target].min()),
+                                            key=f"min_{target}"
+                                        )
+                                    with col_b:
+                                        max_val = st.number_input(
+                                            "Max value",
+                                            value=float(df[target].max()),
+                                            key=f"max_{target}"
+                                        )
+                                    constraints[target] = (min_val, max_val)
+            
+            with col2:
+                st.markdown("#### Fixed Parameters (Optional)")
+                st.info("Lock certain parameters to specific values")
+                
+                fixed_params = {}
+                num_to_fix = st.number_input("Number of parameters to fix", 0, len(feature_cols), 0)
+                
+                if num_to_fix > 0:
+                    for i in range(int(num_to_fix)):
+                        col_a, col_b = st.columns([2, 1])
+                        with col_a:
+                            param = st.selectbox(
+                                f"Parameter {i+1}",
+                                feature_cols,
+                                key=f"fixed_param_{i}"
+                            )
+                        with col_b:
+                            value = st.number_input(
+                                "Value",
+                                value=feature_bounds[param]['mean'],
+                                min_value=feature_bounds[param]['min'],
+                                max_value=feature_bounds[param]['max'],
+                                key=f"fixed_value_{i}",
+                                format="%.4f"
+                            )
+                        fixed_params[param] = value
+            
+            st.markdown("---")
+            
+            if st.button("🚀 Run Optimization", type="primary", use_container_width=True):
+                with st.spinner("Finding optimal parameters... This may take 30-60 seconds"):
+                    
+                    # Helper function for predictions
+                    def predict_all(X):
+                        preds = {}
+                        for target in target_cols:
+                            if target in models:
+                                preds[target] = float(models[target].predict(X.reshape(1, -1))[0])
+                        return preds
+                    
+                    # Objective function
+                    def objective(X):
+                        predictions = predict_all(X)
+                        obj = predictions[target_to_optimize]
+                        
+                        # Add penalties for constraints
+                        penalty = 0
+                        for tgt, (min_v, max_v) in constraints.items():
+                            if tgt in predictions:
+                                val = predictions[tgt]
+                                if val < min_v:
+                                    penalty += (min_v - val) ** 2 * 1000
+                                if val > max_v:
+                                    penalty += (val - max_v) ** 2 * 1000
+                        
+                        if minimize_flag:
+                            return obj + penalty
+                        else:
+                            return -(obj - penalty)
+                    
+                    # Create bounds
+                    bounds = []
+                    for feature in feature_cols:
+                        if feature in fixed_params:
+                            bounds.append((fixed_params[feature], fixed_params[feature]))
+                        else:
+                            bounds.append((feature_bounds[feature]['min'], 
+                                         feature_bounds[feature]['max']))
+                    
+                    # Run optimization
+                    result = differential_evolution(
+                        objective,
+                        bounds,
+                        maxiter=300,
+                        popsize=15,
+                        seed=42,
+                        polish=True,
+                        workers=1
+                    )
+                    
+                    # Extract results
+                    optimal_params = {f: float(v) for f, v in zip(feature_cols, result.x)}
+                    optimal_predictions = predict_all(result.x)
+                    
+                    st.success("✅ Optimization Complete!")
+                    
+                    # Display results
+                    st.markdown("### 🎯 Optimal Predictions")
+                    
+                    col1, col2, col3, col4 = st.columns(4)
+                    colors = [
+                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+                    ]
+                    
+                    for idx, (col, target) in enumerate(zip([col1, col2, col3, col4], target_cols)):
+                        with col:
+                            value = optimal_predictions[target]
+                            is_optimized = (target == target_to_optimize)
+                            
+                            st.markdown(f"""
+                            <div style='background: {colors[idx]}; padding: 20px; border-radius: 12px; 
+                                        text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                                        border: {"3px solid #FFD700" if is_optimized else "none"};'>
+                                <div style='color: #e0e0e0; font-size: 0.85rem; margin-bottom: 10px;'>
+                                    {target.replace('_', ' ').title()}
+                                    {"🎯" if is_optimized else ""}
+                                </div>
+                                <div style='color: #ffffff; font-size: 1.8rem; font-weight: bold;'>
+                                    {value:.4f}
+                                </div>
+                                {"<div style='color: #FFD700; font-size: 0.75rem; margin-top: 5px;'>OPTIMIZED</div>" if is_optimized else ""}
+                            </div>
+                            """, unsafe_allow_html=True)
+                    
+                    st.markdown("---")
+                    
+                    # Show top parameter recommendations
+                    st.markdown("### 🔧 Recommended Parameter Settings")
+                    
+                    # Calculate changes from mean
+                    param_changes = []
+                    for feature, optimal_val in optimal_params.items():
+                        mean_val = feature_bounds[feature]['mean']
+                        change_pct = ((optimal_val - mean_val) / mean_val * 100) if mean_val != 0 else 0
+                        param_changes.append({
+                            'Parameter': feature.replace('_', ' ').title(),
+                            'Optimal Value': f"{optimal_val:.4f}",
+                            'Mean Value': f"{mean_val:.4f}",
+                            'Change': f"{change_pct:+.2f}%",
+                            'Fixed': '🔒' if feature in fixed_params else ''
+                        })
+                    
+                    params_df = pd.DataFrame(param_changes)
+                    params_df = params_df.sort_values('Change', 
+                                                     key=lambda x: abs(x.str.rstrip('%').astype(float)),
+                                                     ascending=False)
+                    
+                    st.dataframe(params_df, use_container_width=True, hide_index=True)
+                    
+                    # Download recommendations
+                    st.markdown("---")
+                    
+                    report = f"""
+HYCARANE OPTIMIZATION REPORT
+Generated: {pd.Timestamp.now()}
 
+OBJECTIVE: {objective} {target_to_optimize.replace('_', ' ').title()}
 
-
-
-# PAGE 5: BUSINESS IMPACT
-elif page == "💰 Business Impact":
-    st.markdown('<h1 class="main-header">💰 Business Impact Calculator</h1>', unsafe_allow_html=True)
-    st.markdown("### 📊 ROI Estimation Tool")
+OPTIMAL PREDICTIONS:
+"""
+                    for target, value in optimal_predictions.items():
+                        report += f"  {target}: {value:.6f}\n"
+                    
+                    report += "\nRECOMMENDED PARAMETERS:\n"
+                    for _, row in params_df.iterrows():
+                        report += f"  {row['Parameter']}: {row['Optimal Value']} ({row['Change']} from mean)\n"
+                    
+                    if constraints:
+                        report += "\nCONSTRAINTS APPLIED:\n"
+                        for tgt, (min_v, max_v) in constraints.items():
+                            report += f"  {tgt}: [{min_v}, {max_v}]\n"
+                    
+                    st.download_button(
+                        "📥 Download Optimization Report",
+                        report,
+                        "optimization_report.txt",
+                        "text/plain",
+                        use_container_width=True
+                    )
+# MODE 2: MULTI-TARGET OPTIMIZATION
+        elif opt_mode == "⚖️ Multi-Target Balance":
+            st.markdown("### ⚖️ Balance Multiple Targets Simultaneously")
+            
+            st.info("💡 Assign weights to targets based on their importance. Higher weight = higher priority.")
+            
+            col1, col2 = st.columns([2, 1])
+            
+            with col1:
+                st.markdown("#### Target Weights")
+                weights = {}
+                
+                for target in target_cols:
+                    weights[target] = st.slider(
+                        target.replace('_', ' ').title(),
+                        min_value=0.0,
+                        max_value=1.0,
+                        value=0.25,
+                        step=0.05,
+                        key=f"weight_{target}"
+                    )
+                
+                total_weight = sum(weights.values())
+                if total_weight > 0:
+                    st.success(f"✅ Total weight: {total_weight:.2f}")
+                    # Normalize display
+                    normalized = {k: v/total_weight for k, v in weights.items()}
+                    st.caption("Normalized: " + ", ".join([f"{k.split('_')[0]}: {v:.1%}" for k, v in normalized.items()]))
+                else:
+                    st.error("⚠️ Please set at least one weight > 0")
+            
+            with col2:
+                st.markdown("#### Quick Presets")
+                if st.button("🎯 Profit Focused", use_container_width=True):
+                    st.session_state.preset = 'profit'
+                if st.button("⚡ H2 Production", use_container_width=True):
+                    st.session_state.preset = 'h2'
+                if st.button("💎 Quality First", use_container_width=True):
+                    st.session_state.preset = 'quality'
+                if st.button("⚖️ Balanced", use_container_width=True):
+                    st.session_state.preset = 'balanced'
+            
+            st.markdown("---")
+            
+            if st.button("🚀 Optimize Multi-Target", type="primary", use_container_width=True):
+                if total_weight == 0:
+                    st.error("Please set at least one weight > 0")
+                else:
+                    with st.spinner("Running multi-objective optimization..."):
+                        
+                        def predict_all(X):
+                            preds = {}
+                            for target in target_cols:
+                                if target in models:
+                                    preds[target] = float(models[target].predict(X.reshape(1, -1))[0])
+                            return preds
+                        
+                        def multi_objective(X):
+                            predictions = predict_all(X)
+                            # Weighted sum (negative for maximization)
+                            weighted_sum = sum(weights[t] * predictions[t] for t in target_cols)
+                            return -weighted_sum
+                        
+                        bounds = [(feature_bounds[f]['min'], feature_bounds[f]['max']) 
+                                 for f in feature_cols]
+                        
+                        result = differential_evolution(
+                            multi_objective,
+                            bounds,
+                            maxiter=300,
+                            popsize=15,
+                            seed=42,
+                            workers=1
+                        )
+                        
+                        optimal_params = {f: float(v) for f, v in zip(feature_cols, result.x)}
+                        optimal_predictions = predict_all(result.x)
+                        
+                        st.success("✅ Multi-Objective Optimization Complete!")
+                        
+                        # Show results
+                        st.markdown("### 🎯 Balanced Optimal Predictions")
+                        
+                        col1, col2, col3, col4 = st.columns(4)
+                        colors = [
+                            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+                        ]
+                        
+                        for idx, (col, target) in enumerate(zip([col1, col2, col3, col4], target_cols)):
+                            with col:
+                                value = optimal_predictions[target]
+                                weight = weights[target]
+                                contribution = weight * value
+                                
+                                st.markdown(f"""
+                                <div style='background: {colors[idx]}; padding: 20px; border-radius: 12px; 
+                                            text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
+                                    <div style='color: #e0e0e0; font-size: 0.85rem; margin-bottom: 10px;'>
+                                        {target.replace('_', ' ').title()}
+                                    </div>
+                                    <div style='color: #ffffff; font-size: 1.8rem; font-weight: bold;'>
+                                        {value:.4f}
+                                    </div>
+                                    <div style='color: #90ee90; font-size: 0.75rem; margin-top: 5px;'>
+                                        Weight: {weight:.2f}
+                                    </div>
+                                </div>
+                                """, unsafe_allow_html=True)
+        
+        # MODE 3: WHAT-IF ANALYSIS
+        else:
+            st.markdown("### 🔧 What-If Scenario Analysis")
+            st.info("Compare different operating scenarios side-by-side")
+            
+            num_scenarios = st.slider("Number of scenarios to compare", 2, 4, 2)
+            
+            scenarios = {}
+            scenario_predictions = {}
+            
+            cols = st.columns(num_scenarios)
+            
+            for i, col in enumerate(cols):
+                with col:
+                    st.markdown(f"#### Scenario {i+1}")
+                    
+                    scenario_params = {}
+                    for feature in feature_cols[:5]:  # Show top 5 features
+                        scenario_params[feature] = st.number_input(
+                            feature.replace('_', ' ').title(),
+                            value=feature_bounds[feature]['mean'],
+                            min_value=feature_bounds[feature]['min'],
+                            max_value=feature_bounds[feature]['max'],
+                            key=f"scenario_{i}_{feature}",
+                            format="%.4f"
+                        )
+                    
+                    # Use mean for remaining features
+                    for feature in feature_cols[5:]:
+                        scenario_params[feature] = feature_bounds[feature]['mean']
+                    
+                    scenarios[f"Scenario {i+1}"] = scenario_params
+            
+            st.markdown("---")
+            
+            if st.button("📊 Compare Scenarios", use_container_width=True):
+                # Predict for each scenario
+                for name, params in scenarios.items():
+                    X = np.array([params[f] for f in feature_cols]).reshape(1, -1)
+                    preds = {}
+                    for target in target_cols:
+                        if target in models:
+                            preds[target] = float(models[target].predict(X)[0])
+                    scenario_predictions[name] = preds
+                
+                # Create comparison table
+                comparison_data = []
+                for target in target_cols:
+                    row = {'Target': target.replace('_', ' ').title()}
+                    for scenario_name in scenarios.keys():
+                        row[scenario_name] = f"{scenario_predictions[scenario_name][target]:.4f}"
+                    comparison_data.append(row)
+                
+                comparison_df = pd.DataFrame(comparison_data)
+                st.dataframe(comparison_df, use_container_width=True, hide_index=True)
+                
+                # Visualization
+                fig = go.Figure()
+                for scenario_name in scenarios.keys():
+                    fig.add_trace(go.Bar(
+                        name=scenario_name,
+                        x=[t.replace('_', ' ').title() for t in target_cols],
+                        y=[scenario_predictions[scenario_name][t] for t in target_cols]
+                    ))
+                
+                fig.update_layout(
+                    title="Scenario Comparison",
+                    barmode='group',
+                    height=500,
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white')
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+    
+    else:
+        st.error("❌ Models or data not loaded properly.")
+# PAGE 6: ECONOMIC IMPACT
+elif page == "📈 Economic Impact":
+    st.markdown('<h1 class="main-header">📈 Economic Optimization & ROI</h1>', unsafe_allow_html=True)
+    st.markdown("### Maximize Profitability with AI Recommendations")
     st.markdown("---")
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("#### Production Parameters")
-        annual_production = st.number_input("Annual Production Batches",
-            min_value=1000, max_value=1000000, value=10000, step=1000)
-        current_efficiency = st.slider("Current Process Efficiency (%)",
-            min_value=60.0, max_value=95.0, value=80.0, step=0.5)
-        revenue_per_batch = st.number_input("Revenue per Batch ($)",
-            min_value=100, max_value=10000, value=1000, step=100)
-    
-    with col2:
-        st.markdown("#### AI Implementation Costs")
-        implementation_cost = st.number_input("Initial Implementation Cost ($)",
-            min_value=10000, max_value=500000, value=50000, step=5000)
-        annual_maintenance = st.number_input("Annual Maintenance Cost ($)",
-            min_value=1000, max_value=50000, value=5000, step=1000)
-        efficiency_improvement = st.slider("Expected Efficiency Improvement (%)",
-            min_value=1.0, max_value=20.0, value=5.0, step=0.5)
-    
-    st.markdown("---")
-    st.markdown("### 📈 Financial Projections")
-    
-    new_efficiency = current_efficiency + efficiency_improvement
-    annual_revenue = annual_production * revenue_per_batch
-    current_effective_revenue = annual_revenue * (current_efficiency / 100)
-    new_effective_revenue = annual_revenue * (new_efficiency / 100)
-    annual_gain = new_effective_revenue - current_effective_revenue
-    net_first_year = annual_gain - implementation_cost - annual_maintenance
-    net_annual = annual_gain - annual_maintenance
-    roi_percentage = (net_first_year / implementation_cost) * 100 if implementation_cost > 0 else 0
-    payback_months = (implementation_cost / (annual_gain / 12)) if annual_gain > 0 else 0
-    
-    col1, col2, col3, col4 = st.columns(4)
-    metrics_colors = [
-        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
-    ]
-    
-    metrics_data = [
-        ('Annual Revenue Gain', f'${annual_gain:,.0f}', f'↑ {efficiency_improvement:.1f}% improvement'),
-        ('First Year ROI', f'{roi_percentage:.1f}%', 'Return on investment'),
-        ('Payback Period', f'{payback_months:.1f} months', 'Time to break-even'),
-        ('Annual Net Profit', f'${net_annual:,.0f}', 'After maintenance')
-    ]
-    
-    for col, color, (title, value, subtitle) in zip([col1, col2, col3, col4], metrics_colors, metrics_data):
-        with col:
-            st.markdown(f"""
-            <div style='background: {color}; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
-                <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 10px;'>{title}</div>
-                <div style='color: #ffffff; font-size: 1.8rem; font-weight: bold; margin-bottom: 5px;'>{value}</div>
-                <div style='color: #90ee90; font-size: 0.85rem;'>{subtitle}</div>
-            </div>
-            """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("#### 💰 Revenue Analysis")
-        st.markdown(f"""
-        - **Current Annual Revenue**: ${annual_revenue:,.0f}
-        - **Current Effective Revenue**: ${current_effective_revenue:,.0f}
-        - **New Effective Revenue**: ${new_effective_revenue:,.0f}
-        - **Efficiency Gain**: {efficiency_improvement:.1f}%
-        """)
-    
-    with col2:
-        st.markdown("#### 📊 Investment Analysis")
-        st.markdown(f"""
-        - **Implementation Cost**: ${implementation_cost:,.0f}
-        - **Annual Maintenance**: ${annual_maintenance:,.0f}
-        - **First Year Net**: ${net_first_year:,.0f}
-        - **Annual Net (Subsequent)**: ${net_annual:,.0f}
-        """)
-    
-    st.markdown("---")
-    st.markdown("#### 📈 5-Year Projection")
-    
-    years = [1, 2, 3, 4, 5]
-    cumulative_costs = [implementation_cost + annual_maintenance]
-    cumulative_revenue = [annual_gain]
-    
-    for year in range(2, 6):
-        cumulative_costs.append(cumulative_costs[-1] + annual_maintenance)
-        cumulative_revenue.append(cumulative_revenue[-1] + annual_gain)
-    
-    net_cash_flow = [rev - cost for rev, cost in zip(cumulative_revenue, cumulative_costs)]
-    
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=years, y=cumulative_revenue, mode='lines+markers',
-        name='Cumulative Revenue Gain', line=dict(color='#2ca02c', width=3)))
-    fig.add_trace(go.Scatter(x=years, y=cumulative_costs, mode='lines+markers',
-        name='Cumulative Costs', line=dict(color='#d62728', width=3)))
-    fig.add_trace(go.Scatter(x=years, y=net_cash_flow, mode='lines+markers',
-        name='Net Cash Flow', line=dict(color='#1f77b4', width=3, dash='dot')))
-    
-    fig.update_layout(title="5-Year Financial Projection", xaxis_title="Year",
-        yaxis_title="Amount ($)", height=500, plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'))
-    
-    st.plotly_chart(fig, use_container_width=True)
+    if df is not None and models:
+        from scipy.optimize import differential_evolution
+        
+        target_cols = ['H2_Yield_Rate', 'Carbon_Quality_', 'H2_Purity_Post_', 'Net_Profit_Margin_Index']
+        feature_cols = [col for col in df.columns if col not in target_cols]
+        
+        # Economic parameters
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### 💰 Market Conditions")
+            h2_price = st.number_input("H2 Price ($/kg)", value=5.0, min_value=1.0, max_value=20.0, step=0.5)
+            carbon_price = st.number_input("Carbon Price ($/kg)", value=50.0, min_value=10.0, max_value=200.0, step=10.0)
+            energy_cost = st.number_input("Energy Cost ($/kWh)", value=0.10, min_value=0.01, max_value=0.50, step=0.01)
+        
+        with col2:
+            st.markdown("#### ⚙️ Production Targets")
+            daily_production = st.number_input("Daily Production Target (batches)", value=100, min_value=10, max_value=1000, step=10)
+            quality_threshold = st.slider("Minimum Quality Threshold", 0.70, 1.0, 0.85, 0.01)
+            purity_threshold = st.slider("Minimum Purity Threshold", 0.70, 1.0, 0.90, 0.01)
+        
+        st.markdown("---")
+        
+        # Optimization mode
+        opt_strategy = st.radio(
+            "Optimization Strategy",
+            ["💎 Maximum Profit", "⚡ Maximum H2 Output", "⚖️ Balanced Performance"],
+            horizontal=True
+        )
+        
+        if st.button("🚀 Optimize for Economic Performance", type="primary", use_container_width=True):
+            with st.spinner("Running economic optimization..."):
+                
+                # Calculate feature bounds
+                feature_bounds = {}
+                for feature in feature_cols:
+                    if pd.api.types.is_datetime64_any_dtype(df[feature]):
+                        # Convert datetime to numeric (Unix timestamp in seconds)
+                        numeric_series = df[feature].astype('int64') / 10**9
+                        feature_bounds[feature] = {
+                            'min': float(numeric_series.min()),
+                            'max': float(numeric_series.max())
+                        }
+                    else:
+                        feature_bounds[feature] = {
+                            'min': float(df[feature].min()),
+                            'max': float(df[feature].max())
+                        }
+                
+                def predict_all(X):
+                    preds = {}
+                    for target in target_cols:
+                        if target in models:
+                            preds[target] = float(models[target].predict(X.reshape(1, -1))[0])
+                    return preds
+                
+                def economic_objective(X):
+                    predictions = predict_all(X)
+                    
+                    # Calculate economic value
+                    h2_revenue = predictions['H2_Yield_Rate'] * h2_price
+                    carbon_revenue = predictions['Carbon_Quality_'] * carbon_price
+                    
+                    # Profit index already captures costs
+                    profit_index = predictions['Net_Profit_Margin_Index']
+                    
+                    # Different strategies
+                    if opt_strategy == "💎 Maximum Profit":
+                        objective = profit_index
+                    elif opt_strategy == "⚡ Maximum H2 Output":
+                        objective = predictions['H2_Yield_Rate']
+                    else:  # Balanced
+                        objective = 0.4 * profit_index + 0.3 * predictions['H2_Yield_Rate'] + 0.3 * predictions['Carbon_Quality_']
+                    
+                    # Apply quality constraints
+                    penalty = 0
+                    if predictions['Carbon_Quality_'] < quality_threshold:
+                        penalty += (quality_threshold - predictions['Carbon_Quality_']) ** 2 * 1000
+                    if predictions['H2_Purity_Post_'] < purity_threshold:
+                        penalty += (purity_threshold - predictions['H2_Purity_Post_']) ** 2 * 1000
+                    
+                    return -(objective - penalty)  # Negative for maximization
+                
+                bounds = [(feature_bounds[f]['min'], feature_bounds[f]['max']) for f in feature_cols]
+                
+                result = differential_evolution(
+                    economic_objective,
+                    bounds,
+                    maxiter=300,
+                    popsize=15,
+                    seed=42,
+                    polish=True,
+                    workers=1
+                )
+                
+                optimal_params = {f: float(v) for f, v in zip(feature_cols, result.x)}
+                optimal_predictions = predict_all(result.x)
+                
+                # Calculate economic metrics
+                h2_yield_optimal = optimal_predictions['H2_Yield_Rate']
+                carbon_quality_optimal = optimal_predictions['Carbon_Quality_']
+                profit_index_optimal = optimal_predictions['Net_Profit_Margin_Index']
+                
+                # Baseline comparison (using mean values)
+                X_baseline = np.array([[(feature_bounds[f]['min'] + feature_bounds[f]['max']) / 2 
+                                      for f in feature_cols]]).reshape(1, -1)
+                baseline_predictions = predict_all(X_baseline)
+                
+                h2_yield_baseline = baseline_predictions['H2_Yield_Rate']
+                profit_index_baseline = baseline_predictions['Net_Profit_Margin_Index']
+                
+                # Calculate improvements
+                h2_improvement = ((h2_yield_optimal - h2_yield_baseline) / h2_yield_baseline * 100) if h2_yield_baseline != 0 else 0
+                profit_improvement = ((profit_index_optimal - profit_index_baseline) / profit_index_baseline * 100) if profit_index_baseline != 0 else 0
+                
+                # Daily revenue calculations
+                daily_h2_production = h2_yield_optimal * daily_production
+                daily_carbon_production = carbon_quality_optimal * daily_production * 0.5  # Assume 0.5 kg carbon per batch
+                
+                daily_revenue_optimal = (daily_h2_production * h2_price + 
+                                        daily_carbon_production * carbon_price)
+                daily_revenue_baseline = (h2_yield_baseline * daily_production * h2_price + 
+                                         baseline_predictions['Carbon_Quality_'] * daily_production * 0.5 * carbon_price)
+                
+                annual_revenue_gain = (daily_revenue_optimal - daily_revenue_baseline) * 365
+                
+                st.success("✅ Economic Optimization Complete!")
+                
+                # Display optimal predictions
+                st.markdown("### 🎯 Optimal Operating Point")
+                
+                col1, col2, col3, col4 = st.columns(4)
+                colors = [
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+                ]
+                
+                for idx, (col, target) in enumerate(zip([col1, col2, col3, col4], target_cols)):
+                    with col:
+                        optimal_val = optimal_predictions[target]
+                        baseline_val = baseline_predictions[target]
+                        improvement = ((optimal_val - baseline_val) / baseline_val * 100) if baseline_val != 0 else 0
+                        
+                        st.markdown(f"""
+                        <div style='background: {colors[idx]}; padding: 20px; border-radius: 12px; 
+                                    text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
+                            <div style='color: #e0e0e0; font-size: 0.85rem; margin-bottom: 10px;'>
+                                {target.replace('_', ' ').title()}
+                            </div>
+                            <div style='color: #ffffff; font-size: 1.8rem; font-weight: bold; margin-bottom: 5px;'>
+                                {optimal_val:.4f}
+                            </div>
+                            <div style='color: {"#90ee90" if improvement >= 0 else "#ff6b6b"}; font-size: 0.75rem;'>
+                                {improvement:+.2f}% vs baseline
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                
+                st.markdown("---")
+                
+                # Economic impact summary
+                st.markdown("### 💰 Economic Impact Analysis")
+                
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.markdown(f"""
+                    <div style='background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
+                                padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
+                        <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 10px;'>Daily Revenue Gain</div>
+                        <div style='color: #ffffff; font-size: 2.2rem; font-weight: bold;'>
+                            ${(daily_revenue_optimal - daily_revenue_baseline):,.0f}
+                        </div>
+                        <div style='color: #90ee90; font-size: 0.8rem;'>Per day improvement</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col2:
+                    st.markdown(f"""
+                    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
+                        <div style='color: #e0e0e0; font-size: 0.9rem; margin-bottom: 10px;'>Annual Revenue Gain</div>
+                        <div style='color: #ffffff; font-size: 2.2rem; font-weight: bold;'>
+                            ${annual_revenue_gain:,.0f}
+                        </div>
+                        <div style='color: #90ee90; font-size: 0.8rem;'>Projected yearly</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col3:
+                    st.markdown(f"""
+                    <div style='background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); 
+                                padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);'>
+                        <div style='color: #2d2d2d; font-size: 0.9rem; margin-bottom: 10px;'>Profit Improvement</div>
+                        <div style='color: #1a1a1a; font-size: 2.2rem; font-weight: bold;'>
+                            {profit_improvement:+.1f}%
+                        </div>
+                        <div style='color: #006400; font-size: 0.8rem;'>vs baseline operation</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.markdown("---")
+                
+                # Recommended parameters
+                st.markdown("### 🔧 Recommended Operating Parameters")
+                
+                # Show top 10 most important parameters
+                param_changes = []
+                for feature, optimal_val in optimal_params.items():
+                    baseline_val = (feature_bounds[feature]['min'] + feature_bounds[feature]['max']) / 2
+                    change_pct = ((optimal_val - baseline_val) / baseline_val * 100) if baseline_val != 0 else 0
+                    param_changes.append({
+                        'Parameter': feature.replace('_', ' ').title(),
+                        'Optimal Value': f"{optimal_val:.4f}",
+                        'Baseline': f"{baseline_val:.4f}",
+                        'Change': f"{change_pct:+.2f}%",
+                        'Abs Change': abs(change_pct)
+                    })
+                
+                params_df = pd.DataFrame(param_changes)
+                params_df = params_df.sort_values('Abs Change', ascending=False).head(10)
+                params_df = params_df.drop('Abs Change', axis=1)
+                
+                st.dataframe(params_df, use_container_width=True, hide_index=True)
+                
+                # Generate implementation report
+                st.markdown("---")
+                
+                report = f"""
+HYCARANE ECONOMIC OPTIMIZATION REPORT
+Generated: {pd.Timestamp.now()}
+Strategy: {opt_strategy}
 
-# Footer
-st.markdown("---")
-st.markdown("""
-<div style='text-align: center; color: #999; padding: 20px;'>
-    <p>⚡ <strong>Hycarane Energy AI Dashboard</strong> | Production-Ready ML System</p>
-    <p>Built with Streamlit • Powered by CatBoost • Real-time Predictions</p>
-</div>
-""", unsafe_allow_html=True)
+=== MARKET CONDITIONS ===
+H2 Price: ${h2_price}/kg
+Carbon Price: ${carbon_price}/kg
+Energy Cost: ${energy_cost}/kWh
+Daily Production Target: {daily_production} batches
+
+=== QUALITY REQUIREMENTS ===
+Minimum Quality: {quality_threshold:.2%}
+Minimum Purity: {purity_threshold:.2%}
+
+=== OPTIMAL PERFORMANCE ===
+H2 Yield Rate: {h2_yield_optimal:.6f}
+Carbon Quality: {carbon_quality_optimal:.6f}
+H2 Purity: {optimal_predictions['H2_Purity_Post_']:.6f}
+Profit Index: {profit_index_optimal:.6f}
+
+=== ECONOMIC IMPACT ===
+Daily Revenue Gain: ${(daily_revenue_optimal - daily_revenue_baseline):,.2f}
+Annual Revenue Gain: ${annual_revenue_gain:,.2f}
+H2 Improvement: {h2_improvement:+.2f}%
+Profit Improvement: {profit_improvement:+.2f}%
+
+=== TOP 10 PARAMETER RECOMMENDATIONS ===
+"""
+                for _, row in params_df.iterrows():
+                    report += f"{row['Parameter']}: {row['Optimal Value']} ({row['Change']} from baseline)\n"
+                
+                report += f"\n=== IMPLEMENTATION NOTES ===\n"
+                report += f"1. Start with small adjustments (±10% of recommended change)\n"
+                report += f"2. Monitor quality metrics continuously\n"
+                report += f"3. Adjust parameters incrementally over 2-4 weeks\n"
+                report += f"4. Document actual performance vs predictions\n"
+                
+                st.download_button(
+                    "📥 Download Economic Optimization Report",
+                    report,
+                    f"economic_optimization_{pd.Timestamp.now().strftime('%Y%m%d')}.txt",
+                    "text/plain",
+                    use_container_width=True
+                )
+                
+                # ROI visualization
+                st.markdown("---")
+                st.markdown("### 📊 ROI Projection")
+                
+                # 5-year projection
+                implementation_cost = 50000  # Default
+                annual_maintenance = 5000
+                
+                years = list(range(1, 6))
+                cumulative_gain = [annual_revenue_gain * year - implementation_cost - (annual_maintenance * year) 
+                                  for year in years]
+                
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(
+                    x=years,
+                    y=cumulative_gain,
+                    mode='lines+markers',
+                    name='Cumulative Net Gain',
+                    line=dict(color='#2ca02c', width=3),
+                    fill='tozeroy',
+                    fillcolor='rgba(44, 160, 44, 0.2)'
+                ))
+                
+                fig.add_hline(y=0, line_dash="dash", line_color="white", opacity=0.5)
+                
+                fig.update_layout(
+                    title="5-Year Net Gain Projection",
+                    xaxis_title="Year",
+                    yaxis_title="Cumulative Gain ($)",
+                    height=400,
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white')
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+    
+    else:
+        st.error("❌ Models or data not loaded properly.")
