@@ -86,7 +86,7 @@ def load_models():
     models = {}
     model_files = [
         'model_H2_Yield_Rate.pkl',
-        'model_Carbon_Quality.pkl',
+        'model_Carbon_Quality_.pkl',
         'model_H2_Purity_Post.pkl',
         'model_Net_Profit_Margin_Index.pkl'
     ]
